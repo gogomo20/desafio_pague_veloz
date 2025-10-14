@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesafioPagueVeloz.API", "DesafioPagueVeloz.API\DesafioPagueVeloz.API.csproj", "{7077AB96-8CC0-4EA9-AA57-080D01B38E63}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{58764B48-72BF-4F4D-890E-B8D8D45EF771}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{443AD34E-D0E3-409A-AF83-360CD9DBF44C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infraestructure", "Infraestructure", "{62DBA3FD-A740-4A21-B0DF-19C5A9286983}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{25B22FBE-3B87-4F58-94F9-8DC08BABF23B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesafioPagueVeloz.Persistense", "DesafioPagueVeloz.Persistense\DesafioPagueVeloz.Persistense.csproj", "{C9BCF3EA-164C-45BC-BFBD-C45F77ADA0FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesafioPagueVeloz.Application", "DesafioPagueVeloz.Application\DesafioPagueVeloz.Application.csproj", "{4D0933A9-7817-42EF-A58A-502348B33E51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesafioPagueVeloz.Domain", "DesafioPagueVeloz.Domain\DesafioPagueVeloz.Domain.csproj", "{549093AB-52E0-4D7B-B2A7-940F29F89FC7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7077AB96-8CC0-4EA9-AA57-080D01B38E63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7077AB96-8CC0-4EA9-AA57-080D01B38E63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7077AB96-8CC0-4EA9-AA57-080D01B38E63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7077AB96-8CC0-4EA9-AA57-080D01B38E63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9BCF3EA-164C-45BC-BFBD-C45F77ADA0FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9BCF3EA-164C-45BC-BFBD-C45F77ADA0FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9BCF3EA-164C-45BC-BFBD-C45F77ADA0FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9BCF3EA-164C-45BC-BFBD-C45F77ADA0FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D0933A9-7817-42EF-A58A-502348B33E51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D0933A9-7817-42EF-A58A-502348B33E51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D0933A9-7817-42EF-A58A-502348B33E51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D0933A9-7817-42EF-A58A-502348B33E51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{549093AB-52E0-4D7B-B2A7-940F29F89FC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{549093AB-52E0-4D7B-B2A7-940F29F89FC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{549093AB-52E0-4D7B-B2A7-940F29F89FC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{549093AB-52E0-4D7B-B2A7-940F29F89FC7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7077AB96-8CC0-4EA9-AA57-080D01B38E63} = {443AD34E-D0E3-409A-AF83-360CD9DBF44C}
+		{C9BCF3EA-164C-45BC-BFBD-C45F77ADA0FD} = {62DBA3FD-A740-4A21-B0DF-19C5A9286983}
+		{4D0933A9-7817-42EF-A58A-502348B33E51} = {25B22FBE-3B87-4F58-94F9-8DC08BABF23B}
+		{549093AB-52E0-4D7B-B2A7-940F29F89FC7} = {25B22FBE-3B87-4F58-94F9-8DC08BABF23B}
+	EndGlobalSection
+EndGlobal

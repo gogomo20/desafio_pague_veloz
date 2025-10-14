@@ -1,0 +1,6 @@
+@DesafioPagueVeloz_HostAddress = http://localhost:5105
+
+GET {{DesafioPagueVeloz_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
