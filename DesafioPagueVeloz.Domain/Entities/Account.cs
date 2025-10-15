@@ -6,6 +6,8 @@ public class Account : BaseEntity
     public decimal ReservedAmount { get; private set; }
     public Currency Currency { get; }
     public decimal CreditLimit { get; }
+    public decimal AvaliableCredit { get; private set; }
+    public HashSet<Operation> Operations { get; private set; } = [];
 
     public Account(
         decimal balance,
@@ -14,17 +16,12 @@ public class Account : BaseEntity
         decimal reservedAmount
     )
     {
-        if(balance < 0)
-            throw new ArgumentException("Saldo inicial deve ser maior ou igual a zero");
-        Balance = balance;
+        if (balance > 0)
+            Operations.Add(new Operation(OperationType.debit, currency, "Depósito incial", balance, null));
         if(currency == null)
             throw new ArgumentNullException("Moeda deve ser informada");
         Currency = currency;
-        if(creditLimit < 0)
-            throw new ArgumentException("Limite de crédito deve ser maior ou igual a zero");
         CreditLimit = creditLimit;
-        if(reservedAmount < 0)
-            throw new ArgumentException("Valor reservado deve ser maior ou igual a zero");
         ReservedAmount = reservedAmount;
     }
 
@@ -44,7 +41,8 @@ public class Account : BaseEntity
         if(value > Balance)
             throw new ArgumentException("Saldo insuficiente");
         Balance -= value;
-        to.Balance += value / to.Currency.Price;
+        var priceDirefence = Currency.Price / to.Currency.Price;
+        to.Balance += (value * priceDirefence);
     }
     public void Capture(decimal value)
     {
@@ -59,6 +57,15 @@ public class Account : BaseEntity
     {
         if ((Balance + CreditLimit) < value)
             throw new ArgumentException("Saldo insuficience!");
-        Balance -= value; 
+        Balance -= value > Balance ? Balance : value;
+        AvaliableCredit -= value > Balance ? value - Balance : 0;
     }
+    public void Credit(decimal value)
+    {
+        Balance += value;
+    }
+    public void AddOperation(Operation operation)
+    {
+        Operations.Add(operation);
+    } 
 }

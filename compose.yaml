@@ -1,0 +1,7 @@
+﻿services:
+  desafiopagueveloz:
+    image: desafiopagueveloz
+    build:
+      context: .
+      dockerfile: DesafioPagueVeloz/Dockerfile
+

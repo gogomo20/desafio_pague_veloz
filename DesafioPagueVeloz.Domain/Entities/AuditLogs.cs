@@ -24,5 +24,5 @@ public class AuditLogs(
     [Column(TypeName = "jsonb")]
     public string? NewValue { get; private set; } = newValue;
 
-    public DateTime CreatedAt { get; private set; } = DateTime.Now;
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 }
