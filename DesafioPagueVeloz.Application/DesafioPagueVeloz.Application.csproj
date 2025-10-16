@@ -7,7 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Modules\" />
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+      <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="13.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DesafioPagueVeloz.Domain\DesafioPagueVeloz.Domain.csproj" />
+      <ProjectReference Include="..\DesafioPagueVeloz.Persistense\DesafioPagueVeloz.Persistense.csproj" />
     </ItemGroup>
 
 </Project>

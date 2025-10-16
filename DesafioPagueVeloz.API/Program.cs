@@ -1,3 +1,4 @@
+using DesafioPagueVeloz.Helpers;
 using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
+builder.Services.InstallServicesInAssembly(builder.Configuration);
 
 var app = builder.Build();
 

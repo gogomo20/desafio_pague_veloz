@@ -1,5 +1,6 @@
 using DesafioPagueVeloz.Persistense.Context;
 using DesafioPagueVeloz.Persistense.Repositories;
+using DesafioPagueVeloz.Persistense.Workers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,5 +21,8 @@ public static class PersistenseExtension
 
         builder.AddScoped(typeof(IReadableRepository<>), typeof(ReadableRepository<>));
         builder.AddScoped(typeof(IWriteableRepository<>), typeof(WriteableRepository<>));
+        builder.AddTransient<ICurrencyRepository, CurrencyRepository>();
+
+        builder.AddHostedService<OperationWorkerService>();
     }
 }

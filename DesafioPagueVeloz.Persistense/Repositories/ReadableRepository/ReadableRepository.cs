@@ -2,6 +2,7 @@
 
 using DesafioPagueVeloz.Domain.Entities;
 using DesafioPagueVeloz.Persistense.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace DesafioPagueVeloz.Persistense.Repositories;
 
