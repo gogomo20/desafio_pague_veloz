@@ -7,6 +7,11 @@ namespace DesafioPagueVeloz.Persistense.Repositories;
 
 public class UnitOfWork(ApplicationContext context) : IUnitOfWork
 {
+    public void ClearChanges()
+    {
+        context.ChangeTracker.Clear();
+    }
+
     public async Task<int> SaveAsync(CancellationToken cancellationToken = default)
     {
         VerifyChanges();
@@ -21,8 +26,14 @@ public class UnitOfWork(ApplicationContext context) : IUnitOfWork
 
     private void VerifyChanges()
     {
+        var jsonOptions = new JsonSerializerOptions
+        {
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = false
+        };
         var changes = context.ChangeTracker.Entries<BaseEntity>()
-            .Where(x => x.Entity is BaseEntity);
+            .Where(x => x.Entity is BaseEntity).ToList();
         foreach (var change in changes )
         {
             string? oldValue = null;
@@ -31,16 +42,16 @@ public class UnitOfWork(ApplicationContext context) : IUnitOfWork
             switch (change.State)
             {
                 case EntityState.Added:
-                    newValue = JsonSerializer.Serialize(change.CurrentValues.ToObject());
+                    newValue = JsonSerializer.Serialize(change.CurrentValues.ToObject(), jsonOptions);
                     break;
                 case EntityState.Modified:
                     action = TypeActionsAuditLogs.Update;
-                    oldValue = JsonSerializer.Serialize(change.OriginalValues.ToObject());
-                    newValue = JsonSerializer.Serialize(change.CurrentValues.ToObject());
+                    oldValue = JsonSerializer.Serialize(change.OriginalValues.ToObject(), jsonOptions);
+                    newValue = JsonSerializer.Serialize(change.CurrentValues.ToObject(), jsonOptions);
                     break;
                 case EntityState.Deleted:
                     action = TypeActionsAuditLogs.Delete;
-                    oldValue = JsonSerializer.Serialize(change.OriginalValues.ToObject());
+                    oldValue = JsonSerializer.Serialize(change.OriginalValues.ToObject(), jsonOptions);
                     change.State = EntityState.Modified;
                     change.Entity.Deactivate();
                     break;

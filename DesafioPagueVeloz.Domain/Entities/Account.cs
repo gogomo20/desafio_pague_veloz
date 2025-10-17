@@ -21,7 +21,7 @@ public class Account : BaseEntity
         if(String.IsNullOrEmpty(clientId))
             throw new ArgumentNullException("Id do cliente deve ser informado");
         if (balance > 0)
-            Operations.Add(new Operation(OperationType.debit, currency, "Depósito incial", balance, null));
+            Operations.Add(new Operation(OperationType.debit, currency, "Depósito incial", balance));
         if(currency == null)
             throw new ArgumentNullException("Moeda deve ser informada");
         ClientId = clientId;
@@ -47,7 +47,14 @@ public class Account : BaseEntity
             throw new ArgumentException("Saldo insuficiente");
         Balance -= value;
         var priceDirefence = Currency.Price / to.Currency.Price;
-        to.Balance += (value * priceDirefence);
+        var operationDebit = new Operation(
+                OperationType.credit,
+                Currency,
+                $"Transferencia enviada",
+                value
+            );
+        operationDebit.SetIrreversible();
+        to.AddOperation(operationDebit);
     }
     public void Capture(decimal value)
     {
@@ -73,4 +80,5 @@ public class Account : BaseEntity
     {
         Operations.Add(operation);
     } 
+    private Account(){}
 }

@@ -32,6 +32,7 @@ public class RasterErrorsBehavior<TRequest, TResponse> : IPipelineBehavior<TRequ
         }
         catch(Exception ex)
         {
+            _unitOfWork.ClearChanges();
             switch (ex)
             {
                 case ValidationException validationException:

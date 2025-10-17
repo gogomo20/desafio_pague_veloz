@@ -12,6 +12,12 @@ public class Currency : BaseEntity
         Code = code;
         Price = 0;
     }
+    public Currency(string name, string code, decimal price)
+    {
+        Name = name;
+        Code = code;
+        Price = price;
+    }
 
     public void SetPrice(decimal price)
     {
@@ -19,4 +25,5 @@ public class Currency : BaseEntity
             throw new ArgumentException("A cotação atual da moeda precia ser maior ou igual a zero");
         Price = price;
     }
+    private Currency(){}
 }

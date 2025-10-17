@@ -1,20 +1,24 @@
+using System.Runtime.InteropServices.JavaScript;
 using DesafioPagueVeloz.Domain.Entities.Accounts;
 
 namespace DesafioPagueVeloz.Domain.Entities;
 
 public enum OperationType
 {
-    credit,
     debit,
-    transfer,
     reserve,
-    capture
+    transfer,
+    credit,
+    capture,
+    reverse
 }
 public enum OperationStatus
 {
     pending,
     completed,
-    canceled
+    canceled,
+    undone,
+    error
 }
 
 public class Operation : BaseEntity
@@ -23,21 +27,57 @@ public class Operation : BaseEntity
     public decimal Value { get; private set; } 
     public OperationStatus Status { get; private set; }
     public Guid AccountId { get; private set;  }
+    public Account Account { get; private set; }
     public Guid? TransferId { get; private set; }
+    public Account? TransferAccount { get; private set; }
     public Currency Currency { get; private set; }
     public string Description { get; private set; }
     public decimal? PreviousBalance { get; private set; }
     public decimal? ResultBalance { get; private set; }
     public decimal? ReservedAmount { get; private set; }
     public decimal? AvaliableCredit { get; private set; }
-    public Operation(OperationType operationType, Currency currency, string description, decimal value, Guid? transferId)
+    public Operation? Undo { get; private set; }
+    public int RetryCounter { get; private set; } = 0;
+    public Guid? ErrorId { get; private set; }
+    public ErrorLogs? Error { get; private set; }
+    public bool IsReversable { get; private set; } = true;
+
+    public Operation(OperationType operationType, Currency currency, string description, decimal value)
     {
+        var acceptedOperations = new[]
+            { OperationType.debit, OperationType.credit, OperationType.capture, OperationType.reserve };
+        if (!acceptedOperations.Contains(operationType))
+            throw new ArgumentException("A movimentação solictada não é possivel ser realizada");
         OperationType = operationType;
         Value = value;
         Currency = currency;
         Status = OperationStatus.pending;
-        TransferId = transferId;
         Description = description;
+    }
+    public Operation(OperationType operationType, Currency currency, string description, decimal value, Account to)
+    {
+        if(operationType != OperationType.transfer)
+            throw new ArgumentException("A movimentação solictada não é possivel ser realizada");
+        OperationType = operationType;
+        Value = value;
+        Currency = currency;
+        Status = OperationStatus.pending;
+        TransferAccount = to;
+        Description = description;
+        IsReversable = false;
+    }
+    private Operation(OperationType operationType, Operation undo)
+    {
+        if (operationType != OperationType.reverse && undo.Status != OperationStatus.completed)
+            throw new ArgumentException("A operação solicitada é invalida");
+        if(!undo.IsReversable)
+            throw new ArgumentException("A operação solicitada não pode ser revertida");
+        OperationType = operationType;
+        Value = undo.Value;
+        Currency = undo.Currency;
+        Undo = undo;
+        Status = OperationStatus.pending;
+        Description = undo.Description;
     }
     public void SetPreviousBalance(decimal previousBalance)
     {
@@ -75,4 +115,27 @@ public class Operation : BaseEntity
     {
         Status = OperationStatus.canceled;
     }
+
+    public void SetError(Guid ErrorId)
+    {
+        ErrorId = ErrorId;
+        Status = OperationStatus.error;
+    }
+
+    public void PushCounter()
+    {
+        RetryCounter++;
+    }
+    public Operation UndoOperation()
+    {
+        if (Status != OperationStatus.completed)
+            throw new ArgumentException("Não é possivel desfazer a operação pois a ação não foi processada");
+        return new Operation(OperationType.reverse, this);
+    }
+    public void SetIrreversible()
+    {
+        IsReversable = false;
+    }
+    private Operation(){}
+
 }

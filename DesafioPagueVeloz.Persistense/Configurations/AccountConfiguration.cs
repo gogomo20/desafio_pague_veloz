@@ -19,5 +19,6 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(x => x.Balance).HasColumnType("decimal(18,2)");
         builder.Property(x => x.CreditLimit).HasColumnType("decimal(18,2)");
         builder.Property(x => x.ReservedAmount).HasColumnType("decimal(18,2)");
+        builder.Navigation(x => x.Operations).AutoInclude();
     }    
 }

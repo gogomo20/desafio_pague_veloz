@@ -10,6 +10,12 @@ public class GenericResponse<T>
     public bool Success => !Errors.Any();
     public string Message { get; private set; }
 
+    public GenericResponse(){}
+    public GenericResponse(T data, string message)
+    {
+        Data = data;
+        Message = message;
+    }
     public void SetSuccess(T data, string message)
     {
         if (Errors.Any())
