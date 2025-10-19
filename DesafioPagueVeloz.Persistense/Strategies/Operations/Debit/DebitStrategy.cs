@@ -6,30 +6,36 @@ namespace DesafioPagueVeloz.Persistense.Strategies.Operations.Debit;
 
 public class DebitStrategy : IOperationStrategy
 {
-    private readonly IReadableRepository<Account> _accountRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    public DebitStrategy(IReadableRepository<Account> accountRepository, IUnitOfWork unitOfWork)
+    private readonly IReadableRepository<Operation> _repository;
+
+    public DebitStrategy(IReadableRepository<Operation> repository)
     {
-        _accountRepository = accountRepository;
-        _unitOfWork = unitOfWork;
+        _repository = repository;
     }
+
     public async Task ExecuteAsync(Operation operation)
     {
-        var account = await _accountRepository.GetByIdAsync(operation.AccountId);
-        if (account is null)
+        await _repository.LoadProperty(operation, x => x.Account);
+        var percentDiference = operation.Currency.Price / operation.Account.Currency.Price;
+        try
         {
-            operation.Cancel();
-        }
-        else
-        {
-            var percentDiference = operation.Currency.Price / account.Currency.Price;
-            operation.SetPreviousBalance(account.Balance);
-            account.Debit(operation.Value * percentDiference);
-            operation.SetResultBalance(account.Balance);
-            operation.SetAvaliableCredit(account.AvaliableCredit);
-            operation.SetReservedAmount(account.ReservedAmount);
+            operation.SetPreviousBalance(operation.Account.Balance);
+            operation.Account.Debit(operation.Value * percentDiference);
+            operation.SetResultBalance(operation.Account.Balance);
+            operation.SetAvaliableCredit(operation.Account.AvaliableCredit);
+            operation.SetReservedAmount(operation.Account.ReservedAmount);
             operation.Complete();
         }
-        await _unitOfWork.SaveAsync();
+        catch (Exception e)
+        {
+            switch (e)
+            {
+                case ArgumentException:
+                    operation.Cancel(e.Message);
+                    break;
+                default:
+                    throw;
+            }
+        }
     }
 }

@@ -36,10 +36,10 @@ public class CaptureCommandHandler : IRequestHandler<CaptureCommand, GenericResp
         var response = new GenericResponse<OperationResponse>();
         var account = await _repository.GetByIdAsync(request.AccountId);
         if (account is null)
-            AppException.NotFound("A conta informada não existe");
+            throw AppException.NotFound("A conta informada não existe");
         var currency = await _currencyRepository.GetAsync(request.Currency);
         if (currency is null)
-            AppException.NotFound("Não possuimos essa moeda em nossa base");
+            throw AppException.NotFound("Não possuimos essa moeda em nossa base");
         var operation = new Operation(
             OperationType.capture,
             currency!,

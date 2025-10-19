@@ -8,7 +8,6 @@ using MediatR;
 namespace DesafioPagueVeloz.Application;
 
 public record ReserveCommand(
-    Guid AccountId,
     decimal Value,
     string Description,
     string Currency
@@ -39,10 +38,13 @@ public record ReserveCommandHandler : IRequestHandler<ReserveCommand, GenericRes
         var response = new GenericResponse<OperationResponse>();
         var account = await _repository.GetByIdAsync(request.AccountId);
         if (account is null)
-            AppException.NotFound("A conta informada não existe");
+            throw AppException.NotFound("A conta informada não existe");
         var currency = await _currencyRepository.GetAsync(request.Currency);
         if (currency is null)
-            AppException.NotFound("Não possuimos essa moeda em nossa base");
+            throw AppException.NotFound("Não possuimos essa moeda em nossa base");
+        var percentDirferecent = currency.Price / account.Currency.Price;
+        if (account.Balance < (request.Value * percentDirferecent))
+            throw AppException.Invalid("Saldo insuficiente");
         var operation = new Operation(
             OperationType.reserve,
             currency!,

@@ -7,27 +7,35 @@ namespace DesafioPagueVeloz.Persistense.Strategies.Operations.Capture;
 
 public class CaptureStrategy : IOperationStrategy
 {
-    private readonly IReadableRepository<Account> _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IReadableRepository<Operation> _repository;
 
-    public CaptureStrategy(IReadableRepository<Account> repository, IUnitOfWork unitOfWork)
+    public CaptureStrategy(IReadableRepository<Operation> repository)
     {
         _repository = repository;
-        _unitOfWork = unitOfWork;
     }
 
     public async Task ExecuteAsync(Operation operation)
     {
-        var account = await _repository.GetByIdAsync(operation.AccountId);
-        if (account == null)
+        try
         {
-            operation.Cancel();
+            await _repository.LoadProperty(operation, x => x.Account);
+            var percentDiference = operation.Account.Currency.Price / operation.Currency.Price;
+            operation.SetPreviousBalance(operation.Account.Balance);
+            operation.Account.Capture(operation.Value * percentDiference);
+            operation.SetResultBalance(operation.Account.Balance);
+            operation.SetAvaliableCredit(operation.Account.AvaliableCredit);
+            operation.SetReservedAmount(operation.Account.ReservedAmount);
         }
-        else
+        catch (Exception e)
         {
-            var percentDiference = account.Currency.Price / operation.Currency.Price;
-            account.Capture(operation.Value * percentDiference);
+            switch (e)
+            {
+                case ArgumentException:
+                    operation.Cancel(e.Message);
+                    break;
+                default:
+                    throw;
+            }
         }
-        await _unitOfWork.SaveAsync();
     }
 }

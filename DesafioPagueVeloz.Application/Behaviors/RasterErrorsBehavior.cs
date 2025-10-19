@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using DesafioPagueVeloz.Domain.DomainExceptions;
 using DesafioPagueVeloz.Domain.Entities;
 using DesafioPagueVeloz.Persistense.Repositories;
 using MediatR;
@@ -37,6 +38,10 @@ public class RasterErrorsBehavior<TRequest, TResponse> : IPipelineBehavior<TRequ
             {
                 case ValidationException validationException:
                     throw;
+                case AppException:
+                    throw;
+                case DomainException:
+                    throw;
                 default:
                     var payload = JsonSerializer.Serialize(
                         request,
@@ -49,7 +54,7 @@ public class RasterErrorsBehavior<TRequest, TResponse> : IPipelineBehavior<TRequ
                     );
                     await _repository.AddAsync(log);
                     await _unitOfWork.SaveAsync(cancellationToken);
-                    throw new ApplicationException("Erro ao realizar a solicitação");
+                    throw AppException.InternalServerError("Erro ao realizar a ação");
             }
         }
     }

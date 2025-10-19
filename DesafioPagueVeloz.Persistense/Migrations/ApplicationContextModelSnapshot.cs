@@ -186,6 +186,9 @@ namespace DesafioPagueVeloz.Persistense.Migrations
                     b.Property<Guid?>("ErrorId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ExecutionDate")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<bool>("IsReversable")
                         .HasColumnType("boolean");
 

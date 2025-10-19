@@ -39,11 +39,14 @@ public class TransferCommandHandler : IRequestHandler<TransferCommand, GenericRe
         var to = await _repository.GetByIdAsync(request.To);
         var currency = await _currencyRepository.GetAsync(request.Currency);
         if (account is null)
-            AppException.NotFound("A conta informada não exite");
+            throw AppException.NotFound("A conta informada não exite");
         if (to is null)
-            AppException.NotFound("A conta no qual deseja realizar a transferência não existe");
+            throw AppException.NotFound("A conta no qual deseja realizar a transferência não existe");
         if (currency is null)
-            AppException.NotFound("Não possuimos essa moeda em nossa base");
+            throw AppException.NotFound("Não possuimos essa moeda em nossa base");
+        var percentDirferecent = currency.Price / account.Currency.Price;
+        if (account.Balance < (request.Value * percentDirferecent))
+            throw AppException.Invalid("Saldo insuficiente");    
         var operation = new Operation(
             OperationType.transfer,
             currency!,

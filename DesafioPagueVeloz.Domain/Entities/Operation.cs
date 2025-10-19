@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices.JavaScript;
+using DesafioPagueVeloz.Domain.DomainExceptions;
 using DesafioPagueVeloz.Domain.Entities.Accounts;
 
 namespace DesafioPagueVeloz.Domain.Entities;
@@ -41,13 +42,13 @@ public class Operation : BaseEntity
     public Guid? ErrorId { get; private set; }
     public ErrorLogs? Error { get; private set; }
     public bool IsReversable { get; private set; } = true;
-
+    public DateTime? ExecutionDate { get; private set; }
     public Operation(OperationType operationType, Currency currency, string description, decimal value)
     {
         var acceptedOperations = new[]
             { OperationType.debit, OperationType.credit, OperationType.capture, OperationType.reserve };
         if (!acceptedOperations.Contains(operationType))
-            throw new ArgumentException("A movimentação solictada não é possivel ser realizada");
+            throw new DomainException("A movimentação solictada não é possivel ser realizada");
         OperationType = operationType;
         Value = value;
         Currency = currency;
@@ -57,7 +58,7 @@ public class Operation : BaseEntity
     public Operation(OperationType operationType, Currency currency, string description, decimal value, Account to)
     {
         if(operationType != OperationType.transfer)
-            throw new ArgumentException("A movimentação solictada não é possivel ser realizada");
+            throw new DomainException("A movimentação solictada não é possivel ser realizada");
         OperationType = operationType;
         Value = value;
         Currency = currency;
@@ -69,9 +70,9 @@ public class Operation : BaseEntity
     private Operation(OperationType operationType, Operation undo)
     {
         if (operationType != OperationType.reverse && undo.Status != OperationStatus.completed)
-            throw new ArgumentException("A operação solicitada é invalida");
+            throw new DomainException("A operação solicitada é invalida");
         if(!undo.IsReversable)
-            throw new ArgumentException("A operação solicitada não pode ser revertida");
+            throw new DomainException("A operação solicitada não pode ser revertida");
         OperationType = operationType;
         Value = undo.Value;
         Currency = undo.Currency;
@@ -82,43 +83,47 @@ public class Operation : BaseEntity
     public void SetPreviousBalance(decimal previousBalance)
     {
         if(Status == OperationStatus.completed || Status == OperationStatus.canceled)
-            throw new ArgumentException("Operação ja foi concluida ou cancelada");
+            throw new DomainException("Operação ja foi concluida ou cancelada");
         PreviousBalance = previousBalance;
     }
 
     public void SetResultBalance(decimal resultBalance)
     {
         if(Status == OperationStatus.completed || Status == OperationStatus.canceled)
-            throw new ArgumentException("Operação ja foi concluida ou cancelada");
+            throw new DomainException("Operação ja foi concluida ou cancelada");
         ResultBalance = resultBalance;
     }
 
     public void SetReservedAmount(decimal reservedAmount)
     {
         if(Status == OperationStatus.completed || Status == OperationStatus.canceled)
-            throw new ArgumentException("Operação ja foi concluida ou cancelada");
+            throw new DomainException("Operação ja foi concluida ou cancelada");
         ReservedAmount = reservedAmount;
     }
     public void SetAvaliableCredit(decimal avaliableCredit)
     {
         if(Status == OperationStatus.completed || Status == OperationStatus.canceled)
-            throw new ArgumentException("Operação ja foi concluida ou cancelada");
+            throw new DomainException("Operação ja foi concluida ou cancelada");
         AvaliableCredit = avaliableCredit;
     }
 
     public void Complete()
     {
+        ExecutionDate = DateTime.UtcNow;
         Status = OperationStatus.completed;
     }
 
-    public void Cancel()
+    public void Cancel(string reason)
     {
+        if (string.IsNullOrEmpty(reason))
+            throw new DomainException("A rasão pelo cancelamento da operação precisa ser informado");
+        Description = reason;
         Status = OperationStatus.canceled;
     }
 
-    public void SetError(Guid ErrorId)
+    public void SetError(ErrorLogs error)
     {
-        ErrorId = ErrorId;
+        Error = error;
         Status = OperationStatus.error;
     }
 
@@ -129,7 +134,7 @@ public class Operation : BaseEntity
     public Operation UndoOperation()
     {
         if (Status != OperationStatus.completed)
-            throw new ArgumentException("Não é possivel desfazer a operação pois a ação não foi processada");
+            throw new DomainException("Não é possivel desfazer a operação pois a ação não foi processada");
         return new Operation(OperationType.reverse, this);
     }
     public void SetIrreversible()

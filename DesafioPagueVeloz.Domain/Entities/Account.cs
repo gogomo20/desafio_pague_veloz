@@ -1,3 +1,5 @@
+using DesafioPagueVeloz.Domain.DomainExceptions;
+
 namespace DesafioPagueVeloz.Domain.Entities.Accounts;
 
 public class Account : BaseEntity
@@ -5,10 +7,10 @@ public class Account : BaseEntity
     public decimal Balance { get; private set; }
     public string ClientId { get; private set; }
     public decimal ReservedAmount { get; private set; }
-    public Currency Currency { get; }
+    public virtual Currency Currency { get; }
     public decimal CreditLimit { get; }
     public decimal AvaliableCredit { get; private set; }
-    public HashSet<Operation> Operations { get; private set; } = [];
+    public virtual HashSet<Operation> Operations { get; private set; } = [];
 
     public Account(
         string clientId,
@@ -18,12 +20,14 @@ public class Account : BaseEntity
         decimal reservedAmount
     )
     {
+        if (balance < 0 || creditLimit < 0 || reservedAmount < 0)
+            throw new DomainException("A conta não pode ser aberta com valores negativos");
         if(String.IsNullOrEmpty(clientId))
-            throw new ArgumentNullException("Id do cliente deve ser informado");
+            throw new DomainException("Id do cliente deve ser informado");
         if (balance > 0)
-            Operations.Add(new Operation(OperationType.debit, currency, "Depósito incial", balance));
+            Operations.Add(new Operation(OperationType.credit, currency, "Depósito incial", balance));
         if(currency == null)
-            throw new ArgumentNullException("Moeda deve ser informada");
+            throw new DomainException("Moeda deve ser informada");
         ClientId = clientId;
         Currency = currency;
         CreditLimit = creditLimit;

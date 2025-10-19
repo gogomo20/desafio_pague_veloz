@@ -6,32 +6,43 @@ namespace DesafioPagueVeloz.Persistense.Strategies.Operations.Transfer;
 
 public class TransferStrategy : IOperationStrategy
 {
-    private readonly IReadableRepository<Account> _accountRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public TransferStrategy(IReadableRepository<Account> accountRepository, IUnitOfWork unitOfWork)
+    private readonly IReadableRepository<Operation> _repository;
+    public TransferStrategy(IReadableRepository<Operation> repository)
     {
-        _accountRepository = accountRepository;
-        _unitOfWork = unitOfWork;
+        _repository = repository;
     }
 
     public async Task ExecuteAsync(Operation operation)
     {
-        var account = await _accountRepository.GetByIdAsync(operation.AccountId);
-        var transferAccount = await _accountRepository.GetByIdAsync((Guid)operation.TransferId!);
-        if(account == null || transferAccount == null)
-            operation.Cancel();
-        else
+        await _repository.LoadProperty(operation, x => x.Account);
+        await _repository.LoadProperty(operation, x => x.TransferAccount);
+        if (operation.TransferAccount is null)
         {
-            var percentDiference = operation.Currency.Price / account.Currency.Price;
-            operation.SetPreviousBalance(account.Balance);
-            var transferValue = percentDiference * account.Currency.Price;
-            account.Transfer(transferValue, transferAccount);
-            operation.SetResultBalance(account.Balance);
-            operation.SetAvaliableCredit(account.AvaliableCredit);
-            operation.SetReservedAmount(account.ReservedAmount);
+            operation.Cancel("Operação inválida");
+            return;
+        }
+
+        try
+        {
+            var percentDiference = operation.Currency.Price / operation.Account.Currency.Price;
+            operation.SetPreviousBalance(operation.Account.Balance);
+            var transferValue = percentDiference * operation.Account.Currency.Price;
+            operation.Account.Transfer(transferValue, operation.TransferAccount);
+            operation.SetResultBalance(operation.Account.Balance);
+            operation.SetAvaliableCredit(operation.Account.AvaliableCredit);
+            operation.SetReservedAmount(operation.Account.ReservedAmount);
             operation.Complete();
         }
-        await _unitOfWork.SaveAsync();
+        catch (Exception e)
+        {
+            switch (e)
+            {
+                case ArgumentException:
+                    operation.Cancel(e.Message);
+                    break;
+                default:
+                    throw;
+            }
+        }
     }
 }

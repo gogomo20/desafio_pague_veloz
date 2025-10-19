@@ -13,11 +13,14 @@ public static class PersistenseExtension
     public static void AddPersistense(this IServiceCollection builder, IConfiguration configuration)
     {
         var conn = configuration.GetConnectionString("DefaultConnection");
-        builder.AddDbContext<ApplicationContext>(options => options.UseNpgsql(conn, o => o.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(5),
-            errorCodesToAdd: null
-        )));
+        builder.AddDbContext<ApplicationContext>(options => 
+            options
+            .UseNpgsql(conn, o =>
+                o.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorCodesToAdd: null
+                )));
         builder.AddScoped<IUnitOfWork>(cfg =>
         {
             var dbContext = cfg.GetRequiredService<ApplicationContext>();
@@ -28,7 +31,5 @@ public static class PersistenseExtension
         builder.AddScoped(typeof(IWriteableRepository<>), typeof(WriteableRepository<>));
         builder.AddTransient<ICurrencyRepository, CurrencyRepository>();
         builder.AddTransient<IAccountRepository, AccountRepository>();
-
-        
     }
 }

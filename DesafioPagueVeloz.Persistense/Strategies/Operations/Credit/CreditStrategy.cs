@@ -6,28 +6,22 @@ namespace DesafioPagueVeloz.Persistense.Strategies.Operations.Credit;
 
 public class CreditStrategy : IOperationStrategy
 {
-    private readonly IReadableRepository<Account> _accountRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IReadableRepository<Operation> _repository;
 
-    public CreditStrategy(IReadableRepository<Account> accountRepository, IUnitOfWork unitOfWork)
+    public CreditStrategy(IReadableRepository<Operation> repository)
     {
-        _accountRepository = accountRepository;
-        _unitOfWork = unitOfWork;
+        _repository = repository;
     }
 
     public async Task ExecuteAsync(Operation operation)
     {
-        var account = await _accountRepository.GetByIdAsync(operation.AccountId);
-        if (account is null)
-        {
-            operation.Cancel();
-        }
-        else
-        {
-            var pricePercent = operation.Currency.Price / account.Currency.Price;
-            account.Credit(operation.Value * pricePercent);
-            operation.Complete();
-        }
-        await _unitOfWork.SaveAsync();
+        await _repository.LoadProperty(operation, x => x.Account);
+        var pricePercent = operation.Currency.Price / operation.Account.Currency.Price;
+        operation.SetPreviousBalance(operation.Account.Balance);
+        operation.Account.Credit(operation.Value * pricePercent);
+        operation.SetResultBalance(operation.Account.Balance);
+        operation.SetAvaliableCredit(operation.Account.AvaliableCredit);
+        operation.SetReservedAmount(operation.Account.ReservedAmount);
+        operation.Complete();
     }
 }

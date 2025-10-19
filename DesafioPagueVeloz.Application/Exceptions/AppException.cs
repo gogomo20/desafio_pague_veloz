@@ -17,11 +17,11 @@ public class AppException : Exception
     }
 
     public static AppException Invalid(string message) =>
-        throw new AppException(message, ApplicationTypeErrors.Invalid);
+        new AppException(message, ApplicationTypeErrors.Invalid);
     public static AppException NotFound(string message) =>
-        throw new AppException(message, ApplicationTypeErrors.NotFound);
+        new AppException(message, ApplicationTypeErrors.NotFound);
     public static AppException BadRequest(string message) =>
-        throw new AppException(message, ApplicationTypeErrors.BadRequest);
+        new AppException(message, ApplicationTypeErrors.BadRequest);
     public static AppException InternalServerError(string message) =>
-        throw new AppException(message, ApplicationTypeErrors.InternalServerError);
+        new AppException(message, ApplicationTypeErrors.InternalServerError);
 }

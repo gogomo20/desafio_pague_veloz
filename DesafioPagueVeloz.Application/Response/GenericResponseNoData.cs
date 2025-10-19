@@ -10,8 +10,14 @@ public class GenericResponseNoData
     {
         Message = message;
     }
-    public void PushError(string error)
+    public void PushError(string error, string message)
     {
+        Message = message;
         Errors.Add(error);
+    }
+    public void PushRangeErrors(List<string> errors, string message)
+    {
+        Message = message;
+        Errors.AddRange(errors);
     }
 }

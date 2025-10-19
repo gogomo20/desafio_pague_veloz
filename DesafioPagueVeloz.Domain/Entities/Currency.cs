@@ -1,3 +1,5 @@
+using DesafioPagueVeloz.Domain.DomainExceptions;
+
 namespace DesafioPagueVeloz.Domain.Entities;
 
 public class Currency : BaseEntity
@@ -22,7 +24,7 @@ public class Currency : BaseEntity
     public void SetPrice(decimal price)
     {
         if (price <= 0)
-            throw new ArgumentException("A cotação atual da moeda precia ser maior ou igual a zero");
+            throw new DomainException("A cotação atual da moeda precia ser maior ou igual a zero");
         Price = price;
     }
     private Currency(){}

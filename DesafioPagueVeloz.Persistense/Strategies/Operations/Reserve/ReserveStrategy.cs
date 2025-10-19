@@ -6,30 +6,22 @@ namespace DesafioPagueVeloz.Persistense.Strategies.Operations.Reserve;
 
 public class ReserveStrategy : IOperationStrategy
 {
-    private readonly IReadableRepository<Account> _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IReadableRepository<Operation> _repository;
 
-    public ReserveStrategy(IReadableRepository<Account> repository, IUnitOfWork unitOfWork)
+    public ReserveStrategy(IReadableRepository<Operation> repository)
     {
         _repository = repository;
-        _unitOfWork = unitOfWork;
     }
 
     public async Task ExecuteAsync(Operation operation)
     {
-        var account = await _repository.GetByIdAsync(operation.AccountId);
-        if(account is null)
-            operation.Cancel();
-        else
-        {
-            var percentDiference = account.Currency.Price / operation.Currency.Price;
-            operation.SetPreviousBalance(account.Balance);
-            account.Reserve(operation.Value * percentDiference);
-            operation.SetResultBalance(account.Balance);
-            operation.SetAvaliableCredit(account.AvaliableCredit);
-            operation.SetReservedAmount(account.ReservedAmount);
-            operation.Complete();
-        }
-        await _unitOfWork.SaveAsync();
+        await _repository.LoadProperty(operation, x => x.Account);
+        var percentDiference = operation.Account.Currency.Price / operation.Currency.Price;
+        operation.SetPreviousBalance(operation.Account.Balance);
+        operation.Account.Reserve(operation.Value * percentDiference);
+        operation.SetResultBalance(operation.Account.Balance);
+        operation.SetAvaliableCredit(operation.Account.AvaliableCredit);
+        operation.SetReservedAmount(operation.Account.ReservedAmount);
+        operation.Complete();
     }
 }

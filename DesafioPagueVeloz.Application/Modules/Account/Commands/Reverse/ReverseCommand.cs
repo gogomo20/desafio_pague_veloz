@@ -31,14 +31,14 @@ public record ReverseCommandHandler : IRequestHandler<ReverseCommand, GenericRes
         var response = new GenericResponse<OperationResponse>();
         var account = await _repository.GetByIdAsync(request.AccountId);
         if (account is null)
-            AppException.NotFound("A conta informada não existe");
+            throw AppException.NotFound("A conta informada não existe");
         var undoOperation = account.Operations.FirstOrDefault(o => o.Id == request.OperationId);
         if (undoOperation is null)
-            AppException.NotFound("A operação informada não existe");
+            throw AppException.NotFound("A operação informada não existe");
         if (undoOperation.Status != OperationStatus.completed)
-            AppException.Invalid("A operação informada não pode ser desfeita pois ela ainda não foi processada");
+            throw AppException.Invalid("A operação informada não pode ser desfeita pois ela ainda não foi processada");
         if (account.Operations.Any(x => x.OperationType == OperationType.reserve && x.Undo?.Id == request.OperationId))
-            AppException.Invalid("Já existe uma solicitação registrada para desfazer a operação informada");
+            throw AppException.Invalid("Já existe uma solicitação registrada para desfazer a operação informada");
 
         var operation = undoOperation.UndoOperation();
         account.AddOperation(operation);

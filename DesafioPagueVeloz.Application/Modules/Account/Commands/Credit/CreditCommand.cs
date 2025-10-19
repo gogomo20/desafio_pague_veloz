@@ -37,9 +37,9 @@ public class CreditCommandHandler : IRequestHandler<CreditCommand, GenericRespon
         var account = await _repository.GetByIdAsync(request.AccountId);
         var currency = await _currencyRepository.GetAsync(request.Currency);
         if (account is null)
-            AppException.NotFound("A conta informada não exite");
+            throw AppException.NotFound("A conta informada não exite");
         if (currency is null)
-            AppException.NotFound("Não possuimos essa moeda em nossa base");
+            throw AppException.NotFound("Não possuimos essa moeda em nossa base");
         var operation = new Operation(
             OperationType.credit,
             currency!,

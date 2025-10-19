@@ -39,15 +39,15 @@ public class OperationWorkerService : BackgroundService
                 _logger.LogInformation("Realizando operações");
                 var scope = _serviceProvider.CreateScope();
                 var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                var readableRepository = scope.ServiceProvider.GetRequiredService<IReadableRepository<Account>>();
+                var readableRepository = scope.ServiceProvider.GetRequiredService<IReadableRepository<Operation>>();
                 var strategies = new Dictionary<OperationType, IOperationStrategy>()
                 {
-                    { OperationType.capture, new CaptureStrategy(readableRepository, unitOfWork) },
-                    { OperationType.credit, new CreditStrategy(readableRepository, unitOfWork) },
-                    { OperationType.debit, new DebitStrategy(readableRepository, unitOfWork) },
-                    { OperationType.transfer, new TransferStrategy(readableRepository, unitOfWork) },
-                    { OperationType.reserve, new ReserveStrategy(readableRepository, unitOfWork) },
-                    { OperationType.reverse, new ReverseStrategy(readableRepository, unitOfWork) }
+                    { OperationType.capture, new CaptureStrategy(readableRepository) },
+                    { OperationType.credit, new CreditStrategy(readableRepository) },
+                    { OperationType.debit, new DebitStrategy(readableRepository) },
+                    { OperationType.transfer, new TransferStrategy(readableRepository) },
+                    { OperationType.reserve, new ReserveStrategy(readableRepository) },
+                    { OperationType.reverse, new ReverseStrategy(readableRepository) }
                 };
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
                 var operations = await context.Set<Operation>()
@@ -60,9 +60,11 @@ public class OperationWorkerService : BackgroundService
                     try
                     {
                         await strategies[operation.OperationType].ExecuteAsync(operation);
+                        await unitOfWork.SaveAsync(stoppingToken);
                     }
                     catch (Exception e)
                     {
+                        unitOfWork.ClearChanges();
                         _logger.LogInformation($"Erro ao realizar operação {operation.OperationType}");
                         var log = new ErrorLogs(
                             "Erro ao realizar operação",
@@ -76,13 +78,13 @@ public class OperationWorkerService : BackgroundService
                                     WriteIndented = false
                                 }
                             ),
-                            e.InnerException.ToString()
+                            e.ToString()
                         );
                         operation.PushCounter();
                         if (operation.RetryCounter > 3)
-                            operation.SetError(log.Id);
+                            operation.SetError(log);
                         context.Set<ErrorLogs>().Add(log);
-                        await context.SaveChangesAsync(stoppingToken);
+                        await unitOfWork.SaveAsync(stoppingToken);
                     }
                 }
             }

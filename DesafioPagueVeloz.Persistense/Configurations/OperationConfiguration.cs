@@ -24,6 +24,5 @@ public class OperationConfiguration : IEntityTypeConfiguration<Operation>
             .WithMany()
             .OnDelete(DeleteBehavior.NoAction);
         builder.Navigation(x => x.Currency).AutoInclude();
-        builder.Navigation(x => x.Account).AutoInclude();
     }
 }

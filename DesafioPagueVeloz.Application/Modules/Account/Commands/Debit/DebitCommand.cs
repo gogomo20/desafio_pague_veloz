@@ -40,9 +40,11 @@ public class DebitCommandHandler : IRequestHandler<DebitCommand, GenericResponse
         var account = await _accountRepository.GetByIdAsync(request.AccountId);
         var currency = await _currencyRepository.GetAsync(request.Currency);
         if (account is null)
-            AppException.NotFound("A conta informada não exite");
+            throw AppException.NotFound("A conta informada não exite");
         if (currency is null)
-            AppException.NotFound("Não possuimos essa moeda em nossa base");
+            throw AppException.NotFound("Não possuimos essa moeda em nossa base");
+        if ((account.Balance + account.AvaliableCredit) < request.Value)
+            throw AppException.Invalid("Saldo insuficiente.");
         var operation = new Operation(
             OperationType.debit,
             currency!,

@@ -32,14 +32,14 @@ public class CreateAccountCommandHandler : IRequestHandler<CreateAccountCommand,
     {
         var currency = await _repositoryCurrency.GetAsync(request.Currency);
         if(currency is null)
-            throw new ValidationException("Moeda informada não existe");
-        var account = new Account(
-            request.ClientId,
-            request.Balance,
-            currency!,
-            request.CreditLimit,
-            request.ReservedAmount
-        );
+            throw AppException.NotFound("Moeda informada não existe");
+        Account account = new Account(
+                request.ClientId,
+                request.Balance,
+                currency!,
+                request.CreditLimit,
+                request.ReservedAmount
+            );
         await _repository.AddAsync(account);
         await _unitOfWork.SaveAsync(cancellationToken);
         var data = new AccountCreatedResponse(
