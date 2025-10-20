@@ -37,7 +37,7 @@ Tecnologia e frameworks utilizados:
  - [Docker componse]https://docs.docker.com/compose/
 ### 🪜 Passo a Passo
 1. Suba os containers:
-```docker-compose up --build````
+```docker-compose up --build```
 2. Acesse a aplicação:
   - Swagger: http://localhost:5000/swagger/index.html
   - Api: http://localhost:5000
