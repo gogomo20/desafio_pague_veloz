@@ -1,7 +1,34 @@
 ﻿services:
+  db: 
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 5
   desafiopagueveloz:
     image: desafiopagueveloz
     build:
       context: .
-      dockerfile: DesafioPagueVeloz/Dockerfile
+      dockerfile: DesafioPagueVeloz.API/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Username=postgres;Password=postgres;Database=postgres"
+      DOTNET_ENVIRONMENT: "Development"
+      DOTNET_URLS: "http://0.0.0.0:5000"
+    ports:
+      - "5000:5000"
+volumes:
+  postgres_data:
+        
 

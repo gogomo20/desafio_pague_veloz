@@ -13,14 +13,31 @@ public static class PersistenseExtension
     public static void AddPersistense(this IServiceCollection builder, IConfiguration configuration)
     {
         var conn = configuration.GetConnectionString("DefaultConnection");
-        builder.AddDbContext<ApplicationContext>(options => 
-            options
-            .UseNpgsql(conn, o =>
-                o.EnableRetryOnFailure(
-                    maxRetryCount: 5,
-                    maxRetryDelay: TimeSpan.FromSeconds(5),
-                    errorCodesToAdd: null
-                )));
+        var enviroment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        if (enviroment == "Testing")
+        {
+            builder.AddDbContext<ApplicationContext>(options => options.UseSqlite("DataSource=:memory")
+                .EnableSensitiveDataLogging());
+            builder.AddSingleton(provider =>
+            {
+                var context = provider.GetRequiredService<ApplicationContext>();
+                context.Database.OpenConnection();
+                context.Database.EnsureCreated();
+                return context;
+            });
+        }
+        else
+        {
+            builder.AddDbContext<ApplicationContext>(options =>
+                options
+                    .UseNpgsql(conn, o =>
+                        o.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(5),
+                            errorCodesToAdd: null
+                        )));
+        }
+
         builder.AddScoped<IUnitOfWork>(cfg =>
         {
             var dbContext = cfg.GetRequiredService<ApplicationContext>();

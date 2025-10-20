@@ -143,4 +143,9 @@ public class Operation : BaseEntity
     }
     private Operation(){}
 
+    //Usar somente em testes para não gerar conflitos
+    public void GenerateId()
+    {
+        Id = Guid.NewGuid();
+    }
 }

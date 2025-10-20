@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using DesafioPagueVeloz.Domain.Entities;
 using DesafioPagueVeloz.Helpers;
 using DesafioPagueVeloz.Persistense.Context;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +33,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-
+    context.Database.Migrate();
     context.Database.EnsureCreated();
     if (!context.Set<Currency>().Any())
     {

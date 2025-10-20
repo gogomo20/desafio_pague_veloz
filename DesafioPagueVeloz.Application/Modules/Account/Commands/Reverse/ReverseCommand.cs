@@ -37,7 +37,7 @@ public record ReverseCommandHandler : IRequestHandler<ReverseCommand, GenericRes
             throw AppException.NotFound("A operação informada não existe");
         if (undoOperation.Status != OperationStatus.completed)
             throw AppException.Invalid("A operação informada não pode ser desfeita pois ela ainda não foi processada");
-        if (account.Operations.Any(x => x.OperationType == OperationType.reserve && x.Undo?.Id == request.OperationId))
+        if (account.Operations.Any(x => x.OperationType == OperationType.reverse && x.Undo?.Id == request.OperationId))
             throw AppException.Invalid("Já existe uma solicitação registrada para desfazer a operação informada");
 
         var operation = undoOperation.UndoOperation();
