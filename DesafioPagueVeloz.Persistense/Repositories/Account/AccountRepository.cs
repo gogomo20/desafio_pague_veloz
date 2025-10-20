@@ -36,6 +36,7 @@ public class AccountRepository : IAccountRepository
         var query = account
             .Where(x => x.Id == id)
             .Select(a => a.Operations
+                .OrderByDescending(x => x.ExecutionDate)
                 .Select(o => new HistoryView
                 {
                     Id = o.Id,
@@ -44,7 +45,8 @@ public class AccountRepository : IAccountRepository
                     Value = o.Value,
                     PreviousBalance = o.PreviousBalance ?? 0,
                     ResultBalance =  o.ResultBalance ?? 0,
-                    Description = o.Description
+                    Description = o.Description,
+                    DateTime = o.ExecutionDate!
                 }).ToList());
         return await query.FirstOrDefaultAsync();
     }

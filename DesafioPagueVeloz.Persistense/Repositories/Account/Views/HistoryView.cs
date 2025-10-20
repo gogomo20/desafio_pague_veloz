@@ -11,4 +11,5 @@ public class HistoryView
     public decimal PreviousBalance { get; init; }
     public decimal ResultBalance { get; init; }
     public required string Description { get; init; }
+    public DateTime? DateTime { get; init; }
 }
